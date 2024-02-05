@@ -1,0 +1,71 @@
+import networkx as nx
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib as plt
+import matplotlib.pyplot as plt  
+from ChemicalCase import ChemicalCase
+
+df = pd.read_csv("gckpp_EdgeList.csv")
+B = nx.DiGraph()
+B.add_edges_from([(df["from"][i],df["to"][i]) for i in range(0,len(df["to"]))])
+
+
+filename = "Amazon_L1_20180101_2100.txt"
+amazon_surface = ChemicalCase(filename)
+
+rxn_node_list = ['R' + str(i) for i in range(1, 914)]
+spc_node_list = [node for node in list(B.nodes) if node not in rxn_node_list]
+
+# Calculate shortest path lengths.
+shortest_paths_amazon = []
+shortest_timescales_amazon = []
+
+count = 0
+for source_node in spc_node_list:
+    for target_node in spc_node_list:
+        if source_node != target_node and nx.has_path(B, source_node, target_node):
+            count += 1
+            print('\rCalculating shortest path #', str(count), end='')
+            path = nx.shortest_path(B, source=source_node, target=target_node, weight='timescale')
+            timescale = nx.path_weight(B, path, weight='timescale')
+        
+            shortest_paths_amazon.append((path, timescale))
+
+# Sort paths based on time scales
+shortest_paths_amazon.sort(key=lambda x: x[1])
+
+#top 5 shortest paths
+top_5_shortest_paths = shortest_paths_amazon[:5]
+for i, (path, timescale) in enumerate(top_5_shortest_paths):
+    print(f"Top {i + 1} Shortest Path: {path}, Timescale: {timescale}")
+
+
+filename = "Beijing_L1_20180702_0400.txt"
+beijing_surface = ChemicalCase(filename)
+
+rxn_node_list = ['R' + str(i) for i in range(1, 914)]
+spc_node_list = [node for node in list(B.nodes) if node not in rxn_node_list]
+
+# Calculate shortest path lengths.
+shortest_paths_beijing = []
+shortest_timescales_beijing = []
+
+count = 0
+for source_node in spc_node_list:
+    for target_node in spc_node_list:
+        if source_node != target_node and nx.has_path(B, source_node, target_node):
+            count += 1
+            print('\rCalculating shortest path #', str(count), end='')
+            path = nx.shortest_path(B, source=source_node, target=target_node, weight='timescale')
+            timescale = nx.path_weight(B, path, weight='timescale')
+        
+            shortest_paths_beijing.append((path, timescale))
+
+# Sort paths based on time scales
+shortest_paths_beijing.sort(key=lambda x: x[1])
+
+#top 5 shortest paths
+top_5_shortest_paths = shortest_paths_beijing[:5]
+for i, (path, timescale) in enumerate(top_5_shortest_paths):
+    print(f"Top {i + 1} Shortest Path: {path}, Timescale: {timescale}")
